@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script>
+</head>
+
+<body>
+
+        <svg  id="testSvg" width="1024" height="1024" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: rgb(241, 242, 243); display: block; shape-rendering: auto;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+            <rect x="17.5" y="30" width="15" height="40" fill="#172b4d">
+              <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="18;30;30" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+              <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="64;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.2s"></animate>
+            </rect>
+            <rect x="42.5" y="30" width="15" height="40" fill="#5e72e4">
+              <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="20.999999999999996;30;30" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+              <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1" begin="-0.1s"></animate>
+            </rect>
+            <rect x="67.5" y="30" width="15" height="40" fill="#dce4eb">
+              <animate attributeName="y" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="20.999999999999996;30;30" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+              <animate attributeName="height" repeatCount="indefinite" dur="1s" calcMode="spline" keyTimes="0;0.5;1" values="58.00000000000001;40;40" keySplines="0 0.5 0.5 1;0 0.5 0.5 1"></animate>
+            </rect>
+    </svg>
+    <canvas width="1024" height="1024"></canvas>
+
+</body>
+
+<script>
+
+    const svg = document.getElementById('testSvg');
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext("2d");
+
+    svg.pauseAnimations();
+    svg.setCurrentTime(1);
+
+    setTimeout(() => {
+        // clone svg
+        const copy = svg.cloneNode(true);
+        // remove the animations from the clone
+        copy.querySelectorAll('animate').forEach(animate => animate.remove());
+
+        // query all animate elements on the original
+        svg.querySelectorAll('animate').forEach(animate => {
+            // target element in original
+            const target = animate.targetElement;
+            const attr = animate.getAttribute('attributeName');
+            const type = animate.getAttribute('attributeType');
+            // target element in copy
+            const copyTarget = copy.getElementById(target.id);
+            // differentiate attribute type
+            if (type === 'XML') {
+                const value = target[attr].animVal.valueAsString || target[attr].animVal;
+                copyTarget.setAttribute(attr, value);
+            } else if (type === 'CSS') {
+                const value = window.getComputedStyle(target)[attr];
+                copyTarget.style[attr] = value
+            }
+        });
+        svg.unpauseAnimations();
+
+        const xml = new XMLSerializer().serializeToString(copy);
+        const data = "data:image/svg+xml;base64," + btoa(xml);
+        const image = new Image();
+        // image load is asynchronuous
+        image.onload = () => ctx.drawImage(image, 0, 0);
+        image.src = data;
+    }, 0);
+
+</script>
+
+</html>
